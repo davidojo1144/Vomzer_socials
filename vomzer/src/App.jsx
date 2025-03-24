@@ -5,7 +5,7 @@ import Login from './pages/Login'
 
 const App = () => {
   return (
-    <div>
+    <div className='overflow-x-hidden'>
       <Login/>
     </div>
   )
