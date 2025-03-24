@@ -10,10 +10,10 @@ const Login = () => {
   return (
     <>
       <div className='container pt-40'>
-        <div>
+        <div className='flex items-center justify-between'>
           <img className='animate-bounce' src={assets.logo} alt="" />
           <div>
-            <div>
+            <div className='text-5xl font-bold'>
               <Title text1={currentState} />
             </div>
           </div>
