@@ -37,20 +37,20 @@ const Login = () => {
                 Sign in with Apple
               </p>
               </div>
-              {/* <button className='py-1 px-6 bg-teal-400 rounded-full hover:bg-teal-300 text-gray-500 ml-10 '>Create Account</button> */}
-              <div className='flex justify-center items-center text-center space-x-3 pt-3'>
+              <div className='flex justify-center items-center text-center space-x-3 pt-4'>
                 <p className='w-8 md:w-28 h-[1px] sm:h-[2px] bg-gray-700'></p>
                 <p>Or</p>
                 <p className='w-8 md:w-28 h-[1px] sm:h-[2px] bg-gray-700'></p>
               </div>
-              <div className='flex flex-col space-y-3 pt-5 pb-5'>
-                <input className='border-2 border-gray-800 py-1 px-10 rounded-xl' type="text" placeholder='Username' />
-                <input className='border-2 border-gray-800 py-1 px-10 rounded-xl'  type="password" placeholder='Password'/>
+              <div className='flex flex-col space-y-3 pt-5 '>
+                <input className='border-2 border-gray-800 py-1 px-10 rounded-xl' type="text" placeholder='Username' required/>
+                <input className='border-2 border-gray-800 py-1 px-10 rounded-xl'  type="password" placeholder='Password'required/>
               </div>
+              <button className='py-1  px-6 border-2 border-teal-300 hover:border-none rounded-full hover:bg-gradient-to-br from-blue-600 to-teal-500 text-gray-500 hover:text-white ml-14 '>Create Account</button> 
             </div>
           </div>
         </div>
-        <p className='text-center text-sm'>By signing up, you agree to the Terms of Service and Privacy <br/>Policy, including Cookie Use.</p>
+        <p className='text-center text-sm pt-10'>By signing up, you agree to the Terms of Service and Privacy <br/>Policy, including Cookie Use.</p>
       </div>
     </>
   )
