@@ -1,6 +1,6 @@
 import logo from "./suilogo-re.png"
 import googlelogo from "./Googlelogo.webp"
-import facebooklogo from "./facebooklogo.png"
+import facebooklogo from "./facebook.png"
 import applelogo from "./applelogo.png"
 
 
