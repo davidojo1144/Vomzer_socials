@@ -37,6 +37,7 @@ const TrendsDisplay = () => {
             <div className='p-3 bg-sky-50 rounded-xl mt-5'>
               <h3 className='text-md font-bold pt-2'>Who to follow</h3>
               <div className="border-t border-gray-300 my-2"></div>
+              <div>
               <div className='flex items-center md:space-x-2 space-x-5'>
                 <img className='w-7 h-7' src={assets.bessie} alt="" />
                 <div>
@@ -44,6 +45,7 @@ const TrendsDisplay = () => {
                   <p className='text-xs text-gray-600'>@alessandroveronezi</p>
                 </div>
                 <button className='text-sky-400 py-0.5 px-2 border font-semibold text-xs border-sky-400 rounded-full hover:text-white hover:bg-sky-400 transition'>Follow</button>
+              </div>
               </div>
               <div className="border-t border-gray-300 my-2"></div>
               <div className='flex items-center md:space-x-2 space-x-5'>

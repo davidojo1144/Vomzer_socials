@@ -4,7 +4,7 @@ import { assets, userimp } from '../assets/assets'
 const UserImple = () => {
   return (
     <>
-      <div className=' md:w-[32%] pt-10 md:pt-0'>
+      <div className=' md:w-[20%] pt-10 md:pt-0'>
         <div>
         <img className='w-10 animate-bounce cursor-pointer' src={assets.logo} alt="" />
           <div className='space-y-6 pt-5'>
@@ -16,9 +16,9 @@ const UserImple = () => {
                 </div>
               ))
             }
-            <button className=' py-2 md:px-16 px-10 text-white bg-gradient-to-br from-blue-600 to-teal-500 rounded-full'>Vomzer</button>
+            <button className=' py-2 md:px-10 px-10 text-white bg-gradient-to-br from-blue-600 to-teal-500 rounded-full'>Vomzer</button>
           </div>
-           <div className='flex items-center md:space-x-4 space-x-2 pt-10 md:pt-32'>
+           <div className='flex items-center md:space-x-4 space-x-2 pt-8 md:pt-32'>
               <img className='w-7 h-7 rounded-full' src={assets.profilepic} alt="" />
               <div>
                 <p className='text-xs font-semibold'>Jerome Bell</p>
