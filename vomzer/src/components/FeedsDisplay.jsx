@@ -218,9 +218,9 @@ const FeedsDisplay = () => {
               <button
                 onClick={savePost}
                 disabled={!postContent && selectedImages.length === 0}
-                className={`px-4 py-2 rounded-full text-white ${(!postContent && selectedImages.length === 0) ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
+                className={`px-4 py-2 rounded-full text-white ${(!postContent && selectedImages.length === 0) ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-500 hover:bg-teal-600'}`}
               >
-                Post
+                Vom
               </button>
             </div>
             
@@ -288,7 +288,7 @@ const FeedsDisplay = () => {
               <div className="flex border-b border-gray-100">
                 <button
                   onClick={() => handleLike(post.id)}
-                  className={`flex-1 py-2 flex items-center justify-center gap-1 ${post.liked ? 'text-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`flex-1 py-2 flex items-center justify-center gap-1 ${post.liked ? 'text-teal-500' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={post.liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -323,9 +323,9 @@ const FeedsDisplay = () => {
                       <button
                         onClick={() => addComment(post.id)}
                         disabled={!commentText.trim()}
-                        className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-teal-500 text-white rounded-full text-sm disabled:opacity-50"
                       >
-                        Post
+                        Vom
                       </button>
                     </div>
                   </div>

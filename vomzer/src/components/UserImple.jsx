@@ -16,7 +16,7 @@ const UserImple = () => {
                 </div>
               ))
             }
-            <button className=' py-2 md:px-10 px-10 text-white bg-gradient-to-br from-blue-600 to-teal-500 rounded-full'>Vomzer</button>
+            <button className=' py-2 md:px-10 px-10 text-white bg-teal-500 hover:bg-teal-600 rounded-full'>Vomzer</button>
           </div>
            <div className='flex items-center md:space-x-1 space-x-2 pt-8 md:pt-32'>
               <img className='w-7 h-7 rounded-full' src={assets.profilepic} alt="" />

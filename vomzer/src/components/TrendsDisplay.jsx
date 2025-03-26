@@ -42,7 +42,7 @@ const TrendsDisplay = () => {
                   <p className='text-xs font-semibold'>Bessie Cooper</p>
                   <p className='text-xs text-gray-600'>@alessandroveronezi</p>
                 </div>
-                <button className='text-sky-400 py-0.5 px-2 border font-semibold text-xs border-sky-400 rounded-full hover:text-white hover:bg-sky-400 transition'>Follow</button>
+                <button className='text-teal-400 py-0.5 px-2 border font-semibold text-xs border-sky-400 rounded-full hover:text-white hover:bg-teal-500 transition'>Connect</button>
               </div>
               </div>
               <div className="border-t border-gray-300 my-2"></div>
@@ -52,10 +52,10 @@ const TrendsDisplay = () => {
                   <p className='text-xs font-semibold'>Jenny Wilson</p>
                   <p className='text-xs text-gray-600'>@gabrielcantarin</p>
                 </div>
-                <button className='text-sky-400  py-0.5 px-2 border font-semibold text-xs border-sky-400 rounded-full hover:text-white hover:bg-sky-400 transition'>Follow</button>
+                <button className='text-teal-400  py-0.5 px-2 border font-semibold text-xs border-sky-400 rounded-full hover:text-white hover:bg-teal-500 transition'>Connect</button>
               </div>
               <div className="border-t border-gray-300 my-2"></div>
-              <p className='text-sm text-sky-400 cursor-pointer'>Show more</p>
+              <p className='text-sm text-teal-400 cursor-pointer'>Show more</p>
             </div>
             <p className='text-xs font-light pt-4'>Terms of Service Privacy Policy Cookie Policy <br/>Ads info More © 2025 V Corp.</p>
           </div>
