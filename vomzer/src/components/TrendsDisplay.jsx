@@ -4,7 +4,7 @@ import { assets, trendsData } from '../assets/assets'
 const TrendsDisplay = () => {
   return (
     <>
-          <div className='md:w-[35%]'>
+          <div className='md:w-[32%]'>
             <div className='flex items-center mb-5 ' >
               <img className='absolute w-3 h-3 ml-3' src={assets.searchicon} alt="" />
               <input className='border border-gray-500 w-[100%] rounded-full bg-sky-100 pl-8 ' type="text" name="" id="" placeholder='Search' />
