@@ -32,7 +32,7 @@ const TrendsDisplay = () => {
                   </div>
                 ))
               }
-              <p className='text-sm text-sky-400 '>Show more</p>
+              <p className='text-sm text-sky-400 cursor-pointer'>Show more</p>
             </div>
             <div className='p-3 bg-sky-50 rounded-xl mt-5'>
               <h3 className='text-md font-bold pt-2'>Who to follow</h3>
@@ -55,7 +55,7 @@ const TrendsDisplay = () => {
                 <button className='text-sky-400  py-0.5 px-2 border font-semibold text-xs border-sky-400 rounded-full hover:text-white hover:bg-sky-400 transition'>Follow</button>
               </div>
               <div className="border-t border-gray-300 my-2"></div>
-              <p className='text-sm text-sky-400 '>Show more</p>
+              <p className='text-sm text-sky-400 cursor-pointer'>Show more</p>
             </div>
             <p className='text-xs font-light pt-4'>Terms of Service Privacy Policy Cookie Policy <br/>Ads info More © 2025 V Corp.</p>
           </div>

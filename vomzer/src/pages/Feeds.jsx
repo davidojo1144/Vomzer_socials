@@ -7,8 +7,8 @@ const Feeds = () => {
   return (
     <>
       <div>
-        <div className='container mt-5'>
-            <div className='flex flex-col md:flex-row '>
+        <div className='container mt-5 '>
+            <div className='flex flex-col md:flex-row justify-between'>
                 <TrendsDisplay/>
                 <FeedsDisplay/>
                 <UserImple/>

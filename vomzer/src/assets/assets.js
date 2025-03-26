@@ -22,6 +22,8 @@ import england from "./england.png"
 import parler from "./parler.png"
 import sydney from "./sydney.png"
 import star from "./star.png"
+import profilepic from "./Profilepic.png"
+import dots from "./dot.png"
 
 
 
@@ -34,7 +36,9 @@ export const assets = {
     searchicon,
     jenny,
     bessie,
-    star
+    star,
+    profilepic,
+    dots
 }
 
 
