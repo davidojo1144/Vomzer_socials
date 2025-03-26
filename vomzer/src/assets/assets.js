@@ -21,6 +21,7 @@ import more from "./more.png"
 import england from "./england.png"
 import parler from "./parler.png"
 import sydney from "./sydney.png"
+import star from "./star.png"
 
 
 
@@ -32,7 +33,8 @@ export const assets = {
     applelogo,
     searchicon,
     jenny,
-    bessie
+    bessie,
+    star
 }
 
 
