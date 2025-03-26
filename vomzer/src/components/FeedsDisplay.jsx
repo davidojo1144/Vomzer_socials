@@ -7,11 +7,16 @@ const FeedsDisplay = () => {
   const [posts, setPosts] = useState([]);
   const fileInputRef = useRef(null);
 
-  // Load saved posts from localStorage on component mount
+  
   useEffect(() => {
     const savedPosts = localStorage.getItem('socialPosts');
     if (savedPosts) {
-      setPosts(JSON.parse(savedPosts));
+      try {
+        const parsedPosts = JSON.parse(savedPosts);
+        setPosts(parsedPosts);
+      } catch (error) {
+        console.error('Error parsing saved posts:', error);
+      }
     }
   }, []);
 
@@ -28,23 +33,34 @@ const FeedsDisplay = () => {
   const savePost = () => {
     if (!postContent && selectedImages.length === 0) return;
 
-    const newPost = {
-      id: Date.now(),
-      content: postContent,
-      images: selectedImages.map(img => img.preview),
-      timestamp: new Date().toISOString()
-    };
+  
+    const imageReaders = selectedImages.map(image => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(image.file);
+      });
+    });
 
-    const updatedPosts = [newPost, ...posts];
-    setPosts(updatedPosts);
-    localStorage.setItem('socialPosts', JSON.stringify(updatedPosts));
+    Promise.all(imageReaders).then(base64Images => {
+      const newPost = {
+        id: Date.now(),
+        content: postContent,
+        images: base64Images, 
+        timestamp: new Date().toISOString()
+      };
 
-    // Reset form
-    setPostContent('');
-    setSelectedImages([]);
-    
-    // Clean up image URLs
-    selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
+      const updatedPosts = [newPost, ...posts];
+      setPosts(updatedPosts);
+      localStorage.setItem('socialPosts', JSON.stringify(updatedPosts));
+
+      
+      setPostContent('');
+      setSelectedImages([]);
+      
+      
+      selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
+    });
   };
 
   const triggerFileInput = () => {
@@ -171,7 +187,7 @@ const FeedsDisplay = () => {
                   </span>
                 </div>
                 {post.content && <p className="mb-3">{post.content}</p>}
-                {post.images.length > 0 && (
+                {post.images && post.images.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {post.images.map((img, idx) => (
                       <img
@@ -179,6 +195,10 @@ const FeedsDisplay = () => {
                         src={img}
                         alt={`Post image ${idx}`}
                         className="w-24 h-24 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://via.placeholder.com/100'; // Fallback image
+                        }}
                       />
                     ))}
                   </div>
