@@ -3,6 +3,8 @@ import googlelogo from "./Googlelogo.webp"
 import facebooklogo from "./facebook.png"
 import applelogo from "./applelogo.png"
 import searchicon from "./search_icon.png"
+import jenny from "./jenny.png"
+import bessie from "./bessie.png"
 
 
 
@@ -28,7 +30,9 @@ export const assets = {
     googlelogo,
     facebooklogo,
     applelogo,
-    searchicon
+    searchicon,
+    jenny,
+    bessie
 }
 
 
