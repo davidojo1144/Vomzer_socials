@@ -5,6 +5,19 @@ import applelogo from "./applelogo.png"
 
 
 
+
+
+import home from "./home.png"
+import explore from "./explore.png"
+import notification from "./notification.png"
+import messages from "./messages.png"
+import bookmark from "./bookmarks.png"
+import list from "./lists.png"
+import profile from "./profile.png"
+import more from "./more.png"
+
+
+
 export const assets = {
     logo,
     googlelogo,
@@ -12,37 +25,39 @@ export const assets = {
     applelogo
 }
 
+
+
 export const userimp = [
     {
-        image: [],
+        image: [home],
         name: "Home"
     },
     {
-        image: [],
+        image: [explore],
         name: "Explore"
     },
     {
-        image: [],
+        image: [notification],
         name: "Notifications"
     },
     {
-        image: [],
+        image: [messages],
         name: "Messages"
     },
     {
-        image: [],
+        image: [bookmark],
         name: "Bookmarks"
     },
     {
-        image: [],
+        image: [list],
         name: "List"
     },
     {
-        image: [],
+        image: [profile],
         name: "Profile"
     },
     {
-        image: [],
+        image: [more],
         name: "More"
     }
 ]
