@@ -2,6 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import { assets } from '../assets/assets';
 
 const FeedsDisplay = () => {
+  // Authentication state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+
   // Post creation state
   const [selectedImages, setSelectedImages] = useState([]);
   const [postContent, setPostContent] = useState('');
@@ -15,7 +20,7 @@ const FeedsDisplay = () => {
   const [commentText, setCommentText] = useState('');
   const [replyText, setReplyText] = useState('');
 
-  // Load saved posts from localStorage
+  // Load saved data from localStorage
   useEffect(() => {
     const savedPosts = localStorage.getItem('socialPosts');
     if (savedPosts) {
@@ -25,16 +30,41 @@ const FeedsDisplay = () => {
         console.error('Error loading posts:', error);
       }
     }
+
+    const savedUser = localStorage.getItem('socialUser');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      setIsLoggedIn(true);
+      setUsername(userData.username);
+    }
   }, []);
 
-  // Save posts to localStorage whenever they change
+  // Save data to localStorage when changed
   useEffect(() => {
     if (posts.length > 0) {
       localStorage.setItem('socialPosts', JSON.stringify(posts));
     }
   }, [posts]);
 
-  // Image handling functions
+  // Login functions
+  const handleLogin = (e) => {
+    e.preventDefault();
+    localStorage.setItem('socialUser', JSON.stringify({
+      username: loginForm.username,
+      // Note: In a real app, never store passwords in localStorage
+    }));
+    setIsLoggedIn(true);
+    setUsername(loginForm.username);
+    setLoginForm({ username: '', password: '' });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('socialUser');
+    setIsLoggedIn(false);
+    setUsername('');
+  };
+
+  // Image handling
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files).map(file => ({
@@ -58,7 +88,6 @@ const FeedsDisplay = () => {
   const savePost = () => {
     if (!postContent && selectedImages.length === 0) return;
 
-    // Convert images to base64
     const imageReaders = selectedImages.map(image => {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -70,6 +99,7 @@ const FeedsDisplay = () => {
     Promise.all(imageReaders).then(base64Images => {
       const newPost = {
         id: Date.now(),
+        username, // Store who created the post
         content: postContent,
         images: base64Images,
         timestamp: new Date().toISOString(),
@@ -83,6 +113,14 @@ const FeedsDisplay = () => {
       setSelectedImages([]);
       selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
     });
+  };
+
+  // Post deletion
+  const deletePost = (postId) => {
+    if (!isLoggedIn) return;
+    
+    const updatedPosts = posts.filter(post => post.id !== postId);
+    setPosts(updatedPosts);
   };
 
   // Like functionality
@@ -158,12 +196,70 @@ const FeedsDisplay = () => {
     setActiveComment({ postId: null, commentId: null });
   };
 
+  // Login form if not authenticated
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md">
+          <h2 className="text-2xl font-bold mb-6 text-center">Login to Manage Posts</h2>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={loginForm.username}
+                onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={loginForm.password}
+                onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Login
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-16 md:w-[45%] w-full md:pt-0 pb-10 max-w-2xl mx-auto">
-      {/* Header */}
+      {/* Header with logout */}
       <div className="flex items-center justify-between px-4">
-        <h3 className="text-xl font-semibold">Post & Feeds</h3>
-        <img src={assets.star} alt="Star icon" className="w-6 h-6" />
+        <div className="flex items-center gap-2">
+          <h3 className="text-xl font-semibold">Post & Feeds</h3>
+          <span className="text-sm text-gray-500">(Logged in as {username})</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <img src={assets.star} alt="Star icon" className="w-6 h-6" />
+          <button 
+            onClick={handleLogout}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            Logout
+          </button>
+        </div>
       </div>
       
       <div className="border-t border-gray-300 my-4"></div>
@@ -244,26 +340,36 @@ const FeedsDisplay = () => {
           </div>
         ) : (
           posts.map(post => (
-            <div key={post.id} className="bg-white rounded-lg shadow overflow-hidden">
+            <div key={post.id} className="bg-white rounded-lg shadow overflow-hidden relative">
+              {/* Delete button (only shows for logged in user) */}
+              {isLoggedIn && (
+                <button
+                  onClick={() => deletePost(post.id)}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                  title="Delete post"
+                >
+                  ×
+                </button>
+              )}
+              
               {/* Post header */}
               <div className="p-4 flex items-center gap-3">
                 <img src={assets.profilepic} alt="Profile" className="w-10 h-10 rounded-full" />
                 <div>
-                  <div className="font-medium">User</div>
+                  <div className="font-medium">{post.username || 'User'}</div>
                   <div className="text-xs text-gray-500">
                     {new Date(post.timestamp).toLocaleString()}
                   </div>
                 </div>
               </div>
               
-              {/* Post content */}
+              {/* Rest of your post display code remains the same */}
               {post.content && (
                 <div className="px-4 pb-3">
                   <p className="whitespace-pre-line">{post.content}</p>
                 </div>
               )}
               
-              {/* Post images */}
               {post.images?.length > 0 && (
                 <div className="flex flex-wrap gap-1 p-1">
                   {post.images.map((img, idx) => (
@@ -278,13 +384,11 @@ const FeedsDisplay = () => {
                 </div>
               )}
               
-              {/* Like/comment stats */}
               <div className="px-4 py-2 border-t border-b border-gray-100 flex justify-between text-sm text-gray-500">
                 <span>{post.likes} likes</span>
                 <span>{post.comments?.length || 0} comments</span>
               </div>
               
-              {/* Like/comment actions */}
               <div className="flex border-b border-gray-100">
                 <button
                   onClick={() => handleLike(post.id)}
@@ -308,7 +412,6 @@ const FeedsDisplay = () => {
               
               {/* Comments section */}
               <div className="p-4 space-y-4">
-                {/* Add comment input */}
                 {activeComment.postId === post.id && activeComment.commentId === null && (
                   <div className="flex gap-2">
                     <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
@@ -331,7 +434,6 @@ const FeedsDisplay = () => {
                   </div>
                 )}
                 
-                {/* Comments list */}
                 {post.comments?.map(comment => (
                   <div key={comment.id} className="space-y-2">
                     <div className="flex gap-2">
@@ -353,7 +455,6 @@ const FeedsDisplay = () => {
                       </div>
                     </div>
                     
-                    {/* Replies to comment */}
                     {comment.replies?.map(reply => (
                       <div key={reply.id} className="flex gap-2 ml-10">
                         <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
@@ -369,7 +470,6 @@ const FeedsDisplay = () => {
                       </div>
                     ))}
                     
-                    {/* Add reply input */}
                     {activeComment.postId === post.id && activeComment.commentId === comment.id && (
                       <div className="flex gap-2 ml-10">
                         <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
