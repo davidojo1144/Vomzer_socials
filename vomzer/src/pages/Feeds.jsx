@@ -7,10 +7,10 @@ const Feeds = () => {
   return (
     <>
       <div>
-        <div className='container'>
+        <div className=' mt-5'>
             <div className='flex flex-col md:flex-row'>
-                <FeedsDisplay/>
                 <TrendsDisplay/>
+                <FeedsDisplay/>
                 <UserImple/>
             </div>
         </div>
