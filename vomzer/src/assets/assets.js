@@ -5,6 +5,11 @@ import applelogo from "./applelogo.png"
 import searchicon from "./search_icon.png"
 import jenny from "./jenny.png"
 import bessie from "./bessie.png"
+import home1 from "./home1.png"
+import home2 from "./home2.png"
+import home3 from "./home3.png"
+import home4 from "./home4.png"
+import home5 from "./home5.png"
 
 
 
@@ -38,7 +43,12 @@ export const assets = {
     bessie,
     star,
     profilepic,
-    dots
+    dots,
+    home1,
+    home2,
+    home3,
+    home4,
+    home5
 }
 
 
