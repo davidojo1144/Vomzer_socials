@@ -5,13 +5,13 @@ const FeedsDisplay = () => {
   return (
     <>
       <div>
-        <div className='w-full'>
+        <div className='w-full bg-purple-500'>
           <div>
             <div>
-              {/* <div className='flex items-center justify-between pl-5'>
+              <div className='flex items-center justify-between pl-5'>
                 <h3 className='text-md font-semibold'>Home</h3>
                 <img src={assets.star} alt="" />
-              </div> */}
+              </div>
             </div>
           </div>
         </div>

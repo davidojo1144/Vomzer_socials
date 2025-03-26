@@ -4,7 +4,7 @@ import { assets, userimp } from '../assets/assets'
 const UserImple = () => {
   return (
     <>
-      <div className=' md:w-[20%] pt-10 md:pt-0'>
+      <div className=' md:w-[20%] pt-10 md:pt-0 bg-green-400'>
         <div>
         <img className='w-10 animate-bounce cursor-pointer' src={assets.logo} alt="" />
           <div className='space-y-6 pt-5'>
