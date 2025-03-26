@@ -11,3 +11,39 @@ export const assets = {
     facebooklogo,
     applelogo
 }
+
+export const userimp = [
+    {
+        image: [],
+        name: "Home"
+    },
+    {
+        image: [],
+        name: "Explore"
+    },
+    {
+        image: [],
+        name: "Notifications"
+    },
+    {
+        image: [],
+        name: "Messages"
+    },
+    {
+        image: [],
+        name: "Bookmarks"
+    },
+    {
+        image: [],
+        name: "List"
+    },
+    {
+        image: [],
+        name: "Profile"
+    },
+    {
+        image: [],
+        name: "More"
+    }
+]
+
