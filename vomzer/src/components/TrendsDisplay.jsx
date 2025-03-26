@@ -4,9 +4,7 @@ import { assets, trendsData } from '../assets/assets'
 const TrendsDisplay = () => {
   return (
     <>
-      <div className='bg-red-100'>
-        <div className='flex flex-col md:flex-row items-center'>
-          <div className=' md:w-[50%] w-full'>
+          <div className='md:w-[25%]'>
             <div className='flex items-center mb-5 ' >
               <img className='absolute w-3 h-3 ml-3' src={assets.searchicon} alt="" />
               <input className='border border-gray-500 w-[100%] rounded-full bg-sky-100 pl-8 ' type="text" name="" id="" placeholder='Search' />
@@ -61,8 +59,7 @@ const TrendsDisplay = () => {
             </div>
             <p className='text-xs font-light pt-4'>Terms of Service Privacy Policy Cookie Policy <br/>Ads info More © 2025 V Corp.</p>
           </div>
-        </div>
-      </div>
+        
     </>
   )
 }
