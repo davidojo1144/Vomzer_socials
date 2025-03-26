@@ -7,9 +7,9 @@ const TrendsDisplay = () => {
           <div className='md:w-[32%]'>
             <div className='flex items-center mb-5 ' >
               <img className='absolute w-3 h-3 ml-3' src={assets.searchicon} alt="" />
-              <input className='border border-gray-500 w-[100%] rounded-full bg-sky-100 pl-8 ' type="text" name="" id="" placeholder='Search' />
+              <input className='border border-gray-500 w-[100%] rounded-full bg-white pl-8 ' type="text" name="" id="" placeholder='Search' />
             </div>
-            <div className='p-3 bg-sky-50 rounded-xl '>
+            <div className='p-3 bg-white rounded-xl '>
               <h3 className='text-md font-bold'>What's happening</h3>
               <div className="border-t border-gray-300 my-2"></div>
               {
@@ -30,9 +30,9 @@ const TrendsDisplay = () => {
                   </div>
                 ))
               }
-              <p className='text-sm text-sky-400 cursor-pointer'>Show more</p>
+              <p className='text-sm text-teal-400 cursor-pointer'>Show more</p>
             </div>
-            <div className='p-3 bg-sky-50 rounded-xl mt-5'>
+            <div className='p-3 bg-white rounded-xl mt-5'>
               <h3 className='text-md font-bold pt-2'>Who to follow</h3>
               <div className="border-t border-gray-300 my-2"></div>
               <div>

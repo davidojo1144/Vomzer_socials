@@ -3,7 +3,7 @@ import React from 'react'
 const Footer = () => {
   return (
     <>
-    <div className='bg-gradient-to-br from-blue-600 to-teal-500 mt-20 '>
+    <div className='bg-gray-600 mt-20 '>
         <div className='container pt-16 pb-16'>
             <div className='flex flex-col text-xs md:text-sm md:text-center justify-center md:flex-row md:space-x-5 md:space-y-0 space-y-3 cursor-pointer'>
                 <p className='text-white hover:text-gray-400'>About</p>

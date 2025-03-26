@@ -2,24 +2,39 @@ import { useState, useRef, useEffect } from 'react';
 import { assets } from '../assets/assets';
 
 const FeedsDisplay = () => {
+  // Post creation state
   const [selectedImages, setSelectedImages] = useState([]);
   const [postContent, setPostContent] = useState('');
-  const [posts, setPosts] = useState([]);
   const fileInputRef = useRef(null);
-
   
+  // Posts data state
+  const [posts, setPosts] = useState([]);
+  
+  // Interaction state (comment/reply)
+  const [activeComment, setActiveComment] = useState({ postId: null, commentId: null });
+  const [commentText, setCommentText] = useState('');
+  const [replyText, setReplyText] = useState('');
+
+  // Load saved posts from localStorage
   useEffect(() => {
     const savedPosts = localStorage.getItem('socialPosts');
     if (savedPosts) {
       try {
-        const parsedPosts = JSON.parse(savedPosts);
-        setPosts(parsedPosts);
+        setPosts(JSON.parse(savedPosts));
       } catch (error) {
-        console.error('Error parsing saved posts:', error);
+        console.error('Error loading posts:', error);
       }
     }
   }, []);
 
+  // Save posts to localStorage whenever they change
+  useEffect(() => {
+    if (posts.length > 0) {
+      localStorage.setItem('socialPosts', JSON.stringify(posts));
+    }
+  }, [posts]);
+
+  // Image handling functions
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files).map(file => ({
@@ -30,10 +45,20 @@ const FeedsDisplay = () => {
     }
   };
 
+  const removeImage = (index) => {
+    setSelectedImages(prev => {
+      const newImages = [...prev];
+      URL.revokeObjectURL(newImages[index].preview);
+      newImages.splice(index, 1);
+      return newImages;
+    });
+  };
+
+  // Post creation
   const savePost = () => {
     if (!postContent && selectedImages.length === 0) return;
 
-  
+    // Convert images to base64
     const imageReaders = selectedImages.map(image => {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -46,166 +71,331 @@ const FeedsDisplay = () => {
       const newPost = {
         id: Date.now(),
         content: postContent,
-        images: base64Images, 
-        timestamp: new Date().toISOString()
+        images: base64Images,
+        timestamp: new Date().toISOString(),
+        likes: 0,
+        liked: false,
+        comments: []
       };
 
-      const updatedPosts = [newPost, ...posts];
-      setPosts(updatedPosts);
-      localStorage.setItem('socialPosts', JSON.stringify(updatedPosts));
-
-      
+      setPosts(prev => [newPost, ...prev]);
       setPostContent('');
       setSelectedImages([]);
-      
-      
       selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
     });
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
+  // Like functionality
+  const handleLike = (postId) => {
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          likes: post.liked ? post.likes - 1 : post.likes + 1,
+          liked: !post.liked
+        };
+      }
+      return post;
+    }));
   };
 
-  const removeImage = (index) => {
-    setSelectedImages(prev => {
-      const newImages = [...prev];
-      URL.revokeObjectURL(newImages[index].preview);
-      newImages.splice(index, 1);
-      return newImages;
-    });
+  // Comment functionality
+  const addComment = (postId) => {
+    if (!commentText.trim()) return;
+
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: [
+            ...post.comments,
+            {
+              id: Date.now(),
+              text: commentText,
+              timestamp: new Date().toISOString(),
+              replies: []
+            }
+          ]
+        };
+      }
+      return post;
+    }));
+
+    setCommentText('');
+    setActiveComment({ postId: null, commentId: null });
   };
 
-  const deletePost = (postId) => {
-    const updatedPosts = posts.filter(post => post.id !== postId);
-    setPosts(updatedPosts);
-    localStorage.setItem('socialPosts', JSON.stringify(updatedPosts));
+  // Reply functionality
+  const addReply = (postId, commentId) => {
+    if (!replyText.trim()) return;
+
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: post.comments.map(comment => {
+            if (comment.id === commentId) {
+              return {
+                ...comment,
+                replies: [
+                  ...comment.replies,
+                  {
+                    id: Date.now(),
+                    text: replyText,
+                    timestamp: new Date().toISOString()
+                  }
+                ]
+              };
+            }
+            return comment;
+          })
+        };
+      }
+      return post;
+    }));
+
+    setReplyText('');
+    setActiveComment({ postId: null, commentId: null });
   };
 
   return (
-    <div className="pt-16 md:pt-0 pb-10">
-      <div className="flex items-center space-x-60 justify-between pl-5">
-        <h3 className="md:text-xl text-xs md:font-semibold">Post & Feeds</h3>
-        <img src={assets.star} alt="" />
+    <div className="pt-16 md:w-[45%] w-full md:pt-0 pb-10 max-w-2xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4">
+        <h3 className="text-xl font-semibold">Post & Feeds</h3>
+        <img src={assets.star} alt="Star icon" className="w-6 h-6" />
       </div>
       
-      <div className="border-t md:w-[100%] border-gray-300 my-7"></div>
+      <div className="border-t border-gray-300 my-4"></div>
       
       {/* New Post Section */}
-      <div className="mb-8">
-        <p className="text-sm md:text-xl pl-5">New Post</p>
-        
-        <div className="flex justify-normal items-center">
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex items-start gap-3">
           <img 
-            className="absolute ml-5 mb-28 rounded-full w-10 h-10" 
             src={assets.profilepic} 
             alt="Profile" 
+            className="w-10 h-10 rounded-full" 
           />
-          <textarea 
-            className="w-full pt-5 text-sm h-44 border-2 border-gray-200 pl-20"  
-            value={postContent}
-            onChange={(e) => setPostContent(e.target.value)}
-            placeholder="Whats on your mind ?"
-          />
-        </div>
-
-        {/* Image upload section */}
-        <div className="mt-4 pl-20">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            ref={fileInputRef}
-            className="hidden"
-            multiple
-          />
-          
-          <div className="flex flex-wrap gap-2 mt-2">
-            {selectedImages.map((image, index) => (
-              <div key={index} className="relative">
-                <img
-                  src={image.preview}
-                  alt={`Preview ${index}`}
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
-                <button
-                  onClick={() => removeImage(index)}
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+          <div className="flex-1">
+            <textarea
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+              placeholder="What's on your mind?"
+              rows="3"
+            />
+            
+            {/* Image preview */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {selectedImages.map((image, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={image.preview}
+                    alt={`Preview ${index}`}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
+                  <button
+                    onClick={() => removeImage(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex justify-between items-center mt-3">
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className="text-blue-500 hover:text-blue-700 flex items-center gap-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Photo
+              </button>
+              
+              <button
+                onClick={savePost}
+                disabled={!postContent && selectedImages.length === 0}
+                className={`px-4 py-2 rounded-full text-white ${(!postContent && selectedImages.length === 0) ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
+              >
+                Post
+              </button>
+            </div>
+            
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              ref={fileInputRef}
+              className="hidden"
+              multiple
+            />
           </div>
-          
-          <button
-            type="button"
-            onClick={triggerFileInput}
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm"
-          >
-            {selectedImages.length > 0 ? 'Add More Images' : 'Add Images'}
-          </button>
-        </div>
-
-        {/* Post button */}
-        <div className="mt-4 pl-20">
-          <button
-            className={`py-2 px-10 text-white cursor-pointer text-sm bg-gradient-to-br from-blue-600 to-teal-500 rounded-full ${
-              (!postContent && selectedImages.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            onClick={savePost}
-            disabled={!postContent && selectedImages.length === 0}
-          >
-            Post
-          </button>
         </div>
       </div>
 
-      {/* Display saved posts */}
-      <div className="mt-8 pl-5 pr-5">
-        <h3 className="text-lg font-semibold mb-4">Your Posts</h3>
+      {/* Posts Feed */}
+      <div className="space-y-6">
         {posts.length === 0 ? (
-          <p className="text-gray-500">No posts yet. Create your first post!</p>
+          <div className="text-center py-10 text-gray-500">
+            No posts yet. Be the first to post!
+          </div>
         ) : (
-          <div className="space-y-6">
-            {posts.map(post => (
-              <div key={post.id} className="bg-white p-4 rounded-lg shadow relative">
-                <button
-                  onClick={() => deletePost(post.id)}
-                  className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
-                >
-                  ×
-                </button>
-                <div className="flex items-center mb-3">
-                  <img 
-                    src={assets.profilepic} 
-                    alt="Profile" 
-                    className="w-8 h-8 rounded-full mr-2"
-                  />
-                  <span className="text-gray-500 text-sm">
+          posts.map(post => (
+            <div key={post.id} className="bg-white rounded-lg shadow overflow-hidden">
+              {/* Post header */}
+              <div className="p-4 flex items-center gap-3">
+                <img src={assets.profilepic} alt="Profile" className="w-10 h-10 rounded-full" />
+                <div>
+                  <div className="font-medium">User</div>
+                  <div className="text-xs text-gray-500">
                     {new Date(post.timestamp).toLocaleString()}
-                  </span>
+                  </div>
                 </div>
-                {post.content && <p className="mb-3">{post.content}</p>}
-                {post.images && post.images.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {post.images.map((img, idx) => (
-                      <img
-                        key={idx}
-                        src={img}
-                        alt={`Post image ${idx}`}
-                        className="w-24 h-24 object-cover rounded-lg"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://via.placeholder.com/100'; // Fallback image
-                        }}
+              </div>
+              
+              {/* Post content */}
+              {post.content && (
+                <div className="px-4 pb-3">
+                  <p className="whitespace-pre-line">{post.content}</p>
+                </div>
+              )}
+              
+              {/* Post images */}
+              {post.images?.length > 0 && (
+                <div className="flex flex-wrap gap-1 p-1">
+                  {post.images.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={img}
+                      alt={`Post ${idx}`}
+                      className="max-h-80 object-cover"
+                      onError={(e) => e.target.src = 'https://via.placeholder.com/300'}
+                    />
+                  ))}
+                </div>
+              )}
+              
+              {/* Like/comment stats */}
+              <div className="px-4 py-2 border-t border-b border-gray-100 flex justify-between text-sm text-gray-500">
+                <span>{post.likes} likes</span>
+                <span>{post.comments?.length || 0} comments</span>
+              </div>
+              
+              {/* Like/comment actions */}
+              <div className="flex border-b border-gray-100">
+                <button
+                  onClick={() => handleLike(post.id)}
+                  className={`flex-1 py-2 flex items-center justify-center gap-1 ${post.liked ? 'text-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={post.liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  Like
+                </button>
+                <button
+                  onClick={() => setActiveComment({ postId: post.id, commentId: null })}
+                  className="flex-1 py-2 flex items-center justify-center gap-1 text-gray-500 hover:text-gray-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  Comment
+                </button>
+              </div>
+              
+              {/* Comments section */}
+              <div className="p-4 space-y-4">
+                {/* Add comment input */}
+                {activeComment.postId === post.id && activeComment.commentId === null && (
+                  <div className="flex gap-2">
+                    <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        type="text"
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="Write a comment..."
+                        className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
-                    ))}
+                      <button
+                        onClick={() => addComment(post.id)}
+                        disabled={!commentText.trim()}
+                        className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm disabled:opacity-50"
+                      >
+                        Post
+                      </button>
+                    </div>
                   </div>
                 )}
+                
+                {/* Comments list */}
+                {post.comments?.map(comment => (
+                  <div key={comment.id} className="space-y-2">
+                    <div className="flex gap-2">
+                      <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
+                      <div className="flex-1">
+                        <div className="bg-gray-100 rounded-lg p-2">
+                          <div className="font-medium text-sm">User</div>
+                          <div className="text-sm">{comment.text}</div>
+                        </div>
+                        <div className="flex gap-3 text-xs text-gray-500 mt-1 ml-2">
+                          <span>{new Date(comment.timestamp).toLocaleTimeString()}</span>
+                          <button 
+                            onClick={() => setActiveComment({ postId: post.id, commentId: comment.id })}
+                            className="hover:text-gray-700"
+                          >
+                            Reply
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Replies to comment */}
+                    {comment.replies?.map(reply => (
+                      <div key={reply.id} className="flex gap-2 ml-10">
+                        <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
+                        <div className="flex-1">
+                          <div className="bg-gray-100 rounded-lg p-2">
+                            <div className="font-medium text-sm">User</div>
+                            <div className="text-sm">{reply.text}</div>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 ml-2">
+                            {new Date(reply.timestamp).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Add reply input */}
+                    {activeComment.postId === post.id && activeComment.commentId === comment.id && (
+                      <div className="flex gap-2 ml-10">
+                        <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
+                        <div className="flex-1 flex gap-2">
+                          <input
+                            type="text"
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder="Write a reply..."
+                            className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                          <button
+                            onClick={() => addReply(post.id, comment.id)}
+                            disabled={!replyText.trim()}
+                            className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm disabled:opacity-50"
+                          >
+                            Reply
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))
         )}
       </div>
     </div>

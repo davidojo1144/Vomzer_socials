@@ -8,7 +8,7 @@ import Feeds from './pages/Feeds'
 
 const App = () => {
   return (
-    <div className='overflow-x-hidden'>
+    <div className='overflow-x-hidden bg-gray-100'>
       <Routes>
         <Route path='/'  element={<Login/>}/>
         <Route path='/mainlogin'  element={<MainLogin/>}/>

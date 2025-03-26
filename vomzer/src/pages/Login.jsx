@@ -16,7 +16,7 @@ const Login = () => {
           <img className='animate-bounce md:w-[40%] w-[70%]' src={assets.logo} alt="" />
           <div className=''>
             <div className='flex items-center justify-center mt-10 md:mt-0 space-x-5'>
-              <p className='prata-regular text-center md:text-5xl text-2xl '>{currentState}</p>
+              <p className=' text-center md:text-5xl text-2xl '>{currentState}</p>
               <p className='w-8 sm:w-12 h-[1px] sm:h-[2px] bg-gray-700'></p>
             </div>
             <div className='pt-10 space-y-3'>
