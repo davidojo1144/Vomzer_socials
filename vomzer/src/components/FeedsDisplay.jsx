@@ -2,8 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { assets } from '../assets/assets';
+import { useNavigate } from 'react-router-dom';
 
 const FeedsDisplay = () => {
+  const navigate = useNavigate();
   // Post creation state
   const [selectedImages, setSelectedImages] = useState([]);
   const [postContent, setPostContent] = useState('');
@@ -17,13 +19,30 @@ const FeedsDisplay = () => {
   const [commentText, setCommentText] = useState('');
   const [replyText, setReplyText] = useState('');
 
+  // Sign out function
+  const handleSignOut = () => {
+    // Clear any user-related data from localStorage
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('socialPosts');
+    
+    // Show toast notification
+    toast.success('Signed out successfully', {
+      position: "top-right",
+      autoClose: 2000,
+    });
+    
+    // Redirect to login page after a short delay
+    setTimeout(() => {
+      navigate('/');
+    }, 2000);
+  };
+
   // Load saved posts from localStorage
   useEffect(() => {
     const savedPosts = localStorage.getItem('socialPosts');
     if (savedPosts) {
       try {
         setPosts(JSON.parse(savedPosts));
-        // toast.info('', { autoClose: 2000 });
       } catch (error) {
         console.error('Error loading posts:', error);
         toast.error('Failed to load posts');
@@ -217,7 +236,15 @@ const FeedsDisplay = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-4">
         <h3 className="text-xl font-semibold">Post & Feeds</h3>
-        <img src={assets.star} alt="Star icon" className="w-6 h-6" />
+        <div className="flex items-center gap-4">
+          <img src={assets.star} alt="Star icon" className="w-6 h-6" />
+          <button 
+            onClick={handleSignOut}
+            className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
       </div>
       
       <div className="border-t border-gray-300 my-4"></div>
