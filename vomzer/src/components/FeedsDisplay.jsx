@@ -23,7 +23,7 @@ const FeedsDisplay = () => {
     if (savedPosts) {
       try {
         setPosts(JSON.parse(savedPosts));
-        toast.info('Posts loaded successfully', { autoClose: 2000 });
+        // toast.info('', { autoClose: 2000 });
       } catch (error) {
         console.error('Error loading posts:', error);
         toast.error('Failed to load posts');

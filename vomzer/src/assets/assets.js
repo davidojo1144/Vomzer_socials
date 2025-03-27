@@ -74,16 +74,16 @@ export const userimp = [
         image: [messages],
         name: "Messages"
     },
-    {
-        id: 5,
-        image: [bookmark],
-        name: "Bookmarks"
-    },
-    {
-        id: 6,
-        image: [list],
-        name: "List"
-    },
+    // {
+    //     id: 5,
+    //     image: [bookmark],
+    //     name: "Bookmarks"
+    // },
+    // {
+    //     id: 6,
+    //     image: [list],
+    //     name: "List"
+    // },
     {
         id: 7,
         image: [profile],
