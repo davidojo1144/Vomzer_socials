@@ -3,9 +3,13 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { assets } from '../assets/assets';
 import { useNavigate } from 'react-router-dom';
+import { getAuth, signOut } from 'firebase/auth';
+import { app } from '../firebase.config'; // Make sure this points to your Firebase config
 
 const FeedsDisplay = () => {
   const navigate = useNavigate();
+  const auth = getAuth(app);
+  
   // Post creation state
   const [selectedImages, setSelectedImages] = useState([]);
   const [postContent, setPostContent] = useState('');
@@ -19,22 +23,28 @@ const FeedsDisplay = () => {
   const [commentText, setCommentText] = useState('');
   const [replyText, setReplyText] = useState('');
 
-  // Sign out function
-  const handleSignOut = () => {
-    // Clear any user-related data from localStorage
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('socialPosts');
-    
-    // Show toast notification
-    toast.success('Signed out successfully', {
-      position: "top-right",
-      autoClose: 2000,
-    });
-    
-    // Redirect to login page after a short delay
-    setTimeout(() => {
+  // Sign out function with Google Auth
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('socialPosts');
+      localStorage.removeItem('userEmail');
+      
+      toast.success('Signed out successfully!', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
       navigate('/');
-    }, 2000);
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast.error('Failed to sign out');
+    }
   };
 
   // Load saved posts from localStorage
