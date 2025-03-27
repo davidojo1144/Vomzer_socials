@@ -2,18 +2,16 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAuLllxxOAeX9EHLeU4ym80JsDwsxolbhI",
+  authDomain: "vomzersocials.firebaseapp.com",
+  projectId: "vomzersocials",
+  storageBucket: "vomzersocials.firebasestorage.app",
+  messagingSenderId: "731426544427",
+  appId: "1:731426544427:web:98b3d7998db665fce3036e"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Authentication exports
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
