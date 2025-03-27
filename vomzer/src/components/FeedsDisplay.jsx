@@ -36,7 +36,7 @@ const FeedsDisplay = () => {
   // Save posts to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('socialPosts', JSON.stringify(posts));
-  }, [posts]);
+  }, []);
 
   // Handle sign out
   const handleSignOut = async () => {
@@ -53,12 +53,17 @@ const FeedsDisplay = () => {
 
   // Handle image selection
   const handleImageChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const filesArray = Array.from(e.target.files).slice(0, 10).map(file => ({
-        file,
-        preview: URL.createObjectURL(file)
-      }));
-      setSelectedImages(filesArray);
+    try{
+      if (e.target.files && e.target.files.length > 0) {
+        const filesArray = Array.from(e.target.files).slice(0, 10).map(file => ({
+          file,
+          preview: URL.createObjectURL(file)
+        }));
+        setSelectedImages(filesArray);
+      }
+    } catch (error) {
+      console.error('Error selecting image:', error);
+      toast.error('Failed to select image');
     }
   };
 
