@@ -54,11 +54,11 @@ const FeedsDisplay = () => {
   // Handle image selection
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      const filesArray = Array.from(e.target.files).map(file => ({
+      const filesArray = Array.from(e.target.files).slice(0, 10).map(file => ({
         file,
         preview: URL.createObjectURL(file)
       }));
-      setSelectedImages(prev => [...prev, ...filesArray]);
+      setSelectedImages(filesArray);
     }
   };
 
@@ -110,7 +110,11 @@ const FeedsDisplay = () => {
       setPosts(prev => [newPost, ...prev]);
       setPostContent('');
       setSelectedImages([]);
-      selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       
       toast.success('Posted successfully!');
     } catch (error) {
@@ -255,15 +259,26 @@ const FeedsDisplay = () => {
             </div>
             
             <div className="flex justify-between items-center mt-3">
-              <button
-                onClick={() => fileInputRef.current.click()}
-                className="text-blue-500 hover:text-blue-700 flex items-center gap-1"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Photo
-              </button>
+              <div>
+                <button
+                  onClick={() => fileInputRef.current.click()}
+                  className="text-blue-500 hover:text-blue-700 flex items-center gap-1"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Photo ({selectedImages.length}/10)
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  ref={fileInputRef}
+                  className="hidden"
+                  multiple
+                  key={selectedImages.length}
+                />
+              </div>
               
               <button
                 onClick={savePost}
@@ -273,15 +288,6 @@ const FeedsDisplay = () => {
                 {isPosting ? 'Posting...' : 'Post'}
               </button>
             </div>
-            
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              ref={fileInputRef}
-              className="hidden"
-              multiple
-            />
           </div>
         </div>
       </div>
@@ -323,15 +329,22 @@ const FeedsDisplay = () => {
               
               {/* Post images */}
               {post.images?.length > 0 && (
-                <div className={`grid ${post.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-1 p-1`}>
+                <div className={`grid ${
+                  post.images.length === 1 ? 'grid-cols-1' : 
+                  post.images.length === 2 ? 'grid-cols-2' : 
+                  'grid-cols-2 md:grid-cols-3'
+                } gap-1 p-1`}>
                   {post.images.map((img, idx) => (
-                    <img
-                      key={idx}
-                      src={img}
-                      alt={`Post ${idx}`}
-                      className="w-full h-48 object-cover rounded-lg"
-                      onError={(e) => e.target.src = 'https://via.placeholder.com/300'}
-                    />
+                    <div key={idx} className={`${
+                      post.images.length === 3 && idx === 0 ? 'col-span-2 row-span-2 h-64' : 'h-48'
+                    }`}>
+                      <img
+                        src={img}
+                        alt={`Post ${idx}`}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => e.target.src = 'https://via.placeholder.com/300'}
+                      />
+                    </div>
                   ))}
                 </div>
               )}
