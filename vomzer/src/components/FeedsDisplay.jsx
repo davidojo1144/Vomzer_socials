@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { assets } from '../assets/assets';
 
 const FeedsDisplay = () => {
@@ -15,33 +17,42 @@ const FeedsDisplay = () => {
   const [commentText, setCommentText] = useState('');
   const [replyText, setReplyText] = useState('');
 
-  // Load saved posts from localStorage on component mount
+  // Load saved posts from localStorage
   useEffect(() => {
     const savedPosts = localStorage.getItem('socialPosts');
     if (savedPosts) {
       try {
         setPosts(JSON.parse(savedPosts));
+        toast.info('Posts loaded successfully', { autoClose: 2000 });
       } catch (error) {
         console.error('Error loading posts:', error);
+        toast.error('Failed to load posts');
       }
     }
   }, []);
 
-  // Save posts to localStorage whenever posts state changes
+  // Save posts to localStorage
   useEffect(() => {
     localStorage.setItem('socialPosts', JSON.stringify(posts));
   }, [posts]);
 
-  // Delete post function
+  // Delete post with confirmation and toast
   const deletePost = (postId) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
       const updatedPosts = posts.filter(post => post.id !== postId);
       setPosts(updatedPosts);
-      // localStorage will update automatically from the useEffect above
+      toast.success('Post deleted successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
-  // Image handling functions
+  // Image handling
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files).map(file => ({
@@ -49,6 +60,7 @@ const FeedsDisplay = () => {
         preview: URL.createObjectURL(file)
       }));
       setSelectedImages(prev => [...prev, ...filesArray]);
+      toast.info(`${e.target.files.length} image(s) selected`, { autoClose: 2000 });
     }
   };
 
@@ -59,13 +71,16 @@ const FeedsDisplay = () => {
       newImages.splice(index, 1);
       return newImages;
     });
+    toast.warn('Image removed', { autoClose: 2000 });
   };
 
-  // Post creation
+  // Create new post with toast
   const savePost = () => {
-    if (!postContent && selectedImages.length === 0) return;
+    if (!postContent && selectedImages.length === 0) {
+      toast.error('Please add content or images to post');
+      return;
+    }
 
-    // Convert images to base64 for persistent storage
     const imageReaders = selectedImages.map(image => {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -88,24 +103,30 @@ const FeedsDisplay = () => {
       setPosts(prev => [newPost, ...prev]);
       setPostContent('');
       setSelectedImages([]);
-      
-      // Clean up image URLs
       selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
+      
+      toast.success('Posted successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }).catch(error => {
+      toast.error('Failed to process images');
+      console.error('Image processing error:', error);
     });
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
   };
 
   // Like functionality
   const handleLike = (postId) => {
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
+        const newLikeStatus = !post.liked;
+        if (newLikeStatus) {
+          toast.info('Liked post', { autoClose: 2000 });
+        }
         return {
           ...post,
-          likes: post.liked ? post.likes - 1 : post.likes + 1,
-          liked: !post.liked
+          likes: newLikeStatus ? post.likes + 1 : post.likes - 1,
+          liked: newLikeStatus
         };
       }
       return post;
@@ -114,7 +135,10 @@ const FeedsDisplay = () => {
 
   // Comment functionality
   const addComment = (postId) => {
-    if (!commentText.trim()) return;
+    if (!commentText.trim()) {
+      toast.error('Please write a comment');
+      return;
+    }
 
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
@@ -136,11 +160,15 @@ const FeedsDisplay = () => {
 
     setCommentText('');
     setActiveComment({ postId: null, commentId: null });
+    toast.success('Comment added!', { autoClose: 2000 });
   };
 
   // Reply functionality
   const addReply = (postId, commentId) => {
-    if (!replyText.trim()) return;
+    if (!replyText.trim()) {
+      toast.error('Please write a reply');
+      return;
+    }
 
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
@@ -169,10 +197,23 @@ const FeedsDisplay = () => {
 
     setReplyText('');
     setActiveComment({ postId: null, commentId: null });
+    toast.success('Reply added!', { autoClose: 2000 });
   };
 
   return (
     <div className="pt-16 md:w-[45%] w-full md:pt-0 pb-10 max-w-2xl mx-auto">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      
       {/* Header */}
       <div className="flex items-center justify-between px-4">
         <h3 className="text-xl font-semibold">Post & Feeds</h3>
@@ -219,7 +260,7 @@ const FeedsDisplay = () => {
             
             <div className="flex justify-between items-center mt-3">
               <button
-                onClick={triggerFileInput}
+                onClick={() => fileInputRef.current.click()}
                 className="text-blue-500 hover:text-blue-700 flex items-center gap-1"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
