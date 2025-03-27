@@ -4,50 +4,23 @@ import 'react-toastify/dist/ReactToastify.css';
 import { assets } from '../assets/assets';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth';
-import { app } from '../firebase.config'; // Make sure this points to your Firebase config
+import { app } from '../firebase.config';
 
 const FeedsDisplay = () => {
   const navigate = useNavigate();
   const auth = getAuth(app);
   
-  // Post creation state
+  // State management
   const [selectedImages, setSelectedImages] = useState([]);
   const [postContent, setPostContent] = useState('');
-  const fileInputRef = useRef(null);
-  
-  // Posts data state
+  const [isPosting, setIsPosting] = useState(false);
   const [posts, setPosts] = useState([]);
-  
-  // Interaction state (comment/reply)
   const [activeComment, setActiveComment] = useState({ postId: null, commentId: null });
   const [commentText, setCommentText] = useState('');
   const [replyText, setReplyText] = useState('');
+  const fileInputRef = useRef(null);
 
-  // Sign out function with Google Auth
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      localStorage.removeItem('userToken');
-      localStorage.removeItem('socialPosts');
-      localStorage.removeItem('userEmail');
-      
-      toast.success('Signed out successfully!', {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      
-      navigate('/');
-    } catch (error) {
-      console.error('Sign out error:', error);
-      toast.error('Failed to sign out');
-    }
-  };
-
-  // Load saved posts from localStorage
+  // Load saved posts on component mount
   useEffect(() => {
     const savedPosts = localStorage.getItem('socialPosts');
     if (savedPosts) {
@@ -60,28 +33,25 @@ const FeedsDisplay = () => {
     }
   }, []);
 
-  // Save posts to localStorage
+  // Save posts to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('socialPosts', JSON.stringify(posts));
   }, [posts]);
 
-  // Delete post with confirmation and toast
-  const deletePost = (postId) => {
-    if (window.confirm('Are you sure you want to delete this post?')) {
-      const updatedPosts = posts.filter(post => post.id !== postId);
-      setPosts(updatedPosts);
-      toast.success('Post deleted successfully!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+  // Handle sign out
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      toast.success('Signed out successfully!');
+      navigate('/');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast.error('Failed to sign out');
     }
   };
 
-  // Image handling
+  // Handle image selection
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files).map(file => ({
@@ -89,10 +59,10 @@ const FeedsDisplay = () => {
         preview: URL.createObjectURL(file)
       }));
       setSelectedImages(prev => [...prev, ...filesArray]);
-      toast.info(`${e.target.files.length} image(s) selected`, { autoClose: 2000 });
     }
   };
 
+  // Remove selected image
   const removeImage = (index) => {
     setSelectedImages(prev => {
       const newImages = [...prev];
@@ -100,25 +70,33 @@ const FeedsDisplay = () => {
       newImages.splice(index, 1);
       return newImages;
     });
-    toast.warn('Image removed', { autoClose: 2000 });
   };
 
-  // Create new post with toast
-  const savePost = () => {
-    if (!postContent && selectedImages.length === 0) {
+  // Create new post
+  const savePost = async () => {
+    if (!postContent.trim() && selectedImages.length === 0) {
       toast.error('Please add content or images to post');
       return;
     }
 
-    const imageReaders = selectedImages.map(image => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.readAsDataURL(image.file);
-      });
-    });
+    setIsPosting(true);
 
-    Promise.all(imageReaders).then(base64Images => {
+    try {
+      let base64Images = [];
+      
+      // Process images if any are selected
+      if (selectedImages.length > 0) {
+        base64Images = await Promise.all(
+          selectedImages.map(image => {
+            return new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target.result);
+              reader.readAsDataURL(image.file);
+            });
+          })
+        );
+      }
+
       const newPost = {
         id: Date.now(),
         content: postContent,
@@ -134,40 +112,40 @@ const FeedsDisplay = () => {
       setSelectedImages([]);
       selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
       
-      toast.success('Posted successfully!', {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    }).catch(error => {
-      toast.error('Failed to process images');
-      console.error('Image processing error:', error);
-    });
+      toast.success('Posted successfully!');
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast.error('Failed to create post');
+    } finally {
+      setIsPosting(false);
+    }
   };
 
-  // Like functionality
+  // Delete post
+  const deletePost = (postId) => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      setPosts(prev => prev.filter(post => post.id !== postId));
+      toast.success('Post deleted successfully!');
+    }
+  };
+
+  // Handle like/unlike
   const handleLike = (postId) => {
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
-        const newLikeStatus = !post.liked;
-        if (newLikeStatus) {
-          toast.info('Liked post', { autoClose: 2000 });
-        }
         return {
           ...post,
-          likes: newLikeStatus ? post.likes + 1 : post.likes - 1,
-          liked: newLikeStatus
+          likes: post.liked ? post.likes - 1 : post.likes + 1,
+          liked: !post.liked
         };
       }
       return post;
     }));
   };
 
-  // Comment functionality
+  // Add comment
   const addComment = (postId) => {
-    if (!commentText.trim()) {
-      toast.error('Please write a comment');
-      return;
-    }
+    if (!commentText.trim()) return;
 
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
@@ -189,15 +167,11 @@ const FeedsDisplay = () => {
 
     setCommentText('');
     setActiveComment({ postId: null, commentId: null });
-    toast.success('Comment added!', { autoClose: 2000 });
   };
 
-  // Reply functionality
+  // Add reply
   const addReply = (postId, commentId) => {
-    if (!replyText.trim()) {
-      toast.error('Please write a reply');
-      return;
-    }
+    if (!replyText.trim()) return;
 
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
@@ -226,22 +200,11 @@ const FeedsDisplay = () => {
 
     setReplyText('');
     setActiveComment({ postId: null, commentId: null });
-    toast.success('Reply added!', { autoClose: 2000 });
   };
 
   return (
     <div className="pt-16 md:w-[45%] w-full md:pt-0 pb-10 max-w-2xl mx-auto">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer position="top-right" autoClose={3000} />
       
       {/* Header */}
       <div className="flex items-center justify-between px-4">
@@ -262,11 +225,7 @@ const FeedsDisplay = () => {
       {/* New Post Section */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
         <div className="flex items-start gap-3">
-          <img 
-            src={assets.profilepic} 
-            alt="Profile" 
-            className="w-10 h-10 rounded-full" 
-          />
+          <img src={assets.profilepic} alt="Profile" className="w-10 h-10 rounded-full" />
           <div className="flex-1">
             <textarea
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -308,10 +267,10 @@ const FeedsDisplay = () => {
               
               <button
                 onClick={savePost}
-                disabled={!postContent && selectedImages.length === 0}
-                className={`px-4 py-2 rounded-full text-white ${(!postContent && selectedImages.length === 0) ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-500 hover:bg-teal-600'}`}
+                disabled={(!postContent.trim() && selectedImages.length === 0) || isPosting}
+                className={`px-4 py-2 rounded-full text-white ${(!postContent.trim() && selectedImages.length === 0) || isPosting ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-500 hover:bg-teal-600'}`}
               >
-                Post
+                {isPosting ? 'Posting...' : 'Post'}
               </button>
             </div>
             
@@ -335,25 +294,24 @@ const FeedsDisplay = () => {
           </div>
         ) : (
           posts.map(post => (
-            <div key={post.id} className="bg-white rounded-lg shadow overflow-hidden relative">
-              {/* Delete button */}
-              <button
-                onClick={() => deletePost(post.id)}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
-                title="Delete post"
-              >
-                ×
-              </button>
-              
+            <div key={post.id} className="bg-white rounded-lg shadow overflow-hidden">
               {/* Post header */}
-              <div className="p-4 flex items-center gap-3">
-                <img src={assets.profilepic} alt="Profile" className="w-10 h-10 rounded-full" />
-                <div>
-                  <div className="font-medium">User</div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(post.timestamp).toLocaleString()}
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img src={assets.profilepic} alt="Profile" className="w-10 h-10 rounded-full" />
+                  <div>
+                    <div className="font-medium">User</div>
+                    <div className="text-xs text-gray-500">
+                      {new Date(post.timestamp).toLocaleString()}
+                    </div>
                   </div>
                 </div>
+                <button
+                  onClick={() => deletePost(post.id)}
+                  className="text-gray-500 hover:text-red-500"
+                >
+                  ×
+                </button>
               </div>
               
               {/* Post content */}
@@ -365,26 +323,26 @@ const FeedsDisplay = () => {
               
               {/* Post images */}
               {post.images?.length > 0 && (
-                <div className="flex flex-wrap gap-1 p-1">
+                <div className={`grid ${post.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-1 p-1`}>
                   {post.images.map((img, idx) => (
                     <img
                       key={idx}
                       src={img}
                       alt={`Post ${idx}`}
-                      className="max-h-80 object-cover"
+                      className="w-full h-48 object-cover rounded-lg"
                       onError={(e) => e.target.src = 'https://via.placeholder.com/300'}
                     />
                   ))}
                 </div>
               )}
               
-              {/* Like/comment stats */}
+              {/* Post stats */}
               <div className="px-4 py-2 border-t border-b border-gray-100 flex justify-between text-sm text-gray-500">
-                <span>{post.likes} likes</span>
-                <span>{post.comments?.length || 0} comments</span>
+                <span>{post.likes} {post.likes === 1 ? 'like' : 'likes'}</span>
+                <span>{post.comments?.length || 0} {post.comments?.length === 1 ? 'comment' : 'comments'}</span>
               </div>
               
-              {/* Like/comment actions */}
+              {/* Post actions */}
               <div className="flex border-b border-gray-100">
                 <button
                   onClick={() => handleLike(post.id)}
@@ -408,7 +366,7 @@ const FeedsDisplay = () => {
               
               {/* Comments section */}
               <div className="p-4 space-y-4">
-                {/* Add comment input */}
+                {/* Add comment */}
                 {activeComment.postId === post.id && activeComment.commentId === null && (
                   <div className="flex gap-2">
                     <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
@@ -433,7 +391,7 @@ const FeedsDisplay = () => {
                 
                 {/* Comments list */}
                 {post.comments?.map(comment => (
-                  <div key={comment.id} className="space-y-2">
+                  <div key={comment.id} className="space-y-3">
                     <div className="flex gap-2">
                       <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
                       <div className="flex-1">
@@ -453,7 +411,7 @@ const FeedsDisplay = () => {
                       </div>
                     </div>
                     
-                    {/* Replies to comment */}
+                    {/* Replies */}
                     {comment.replies?.map(reply => (
                       <div key={reply.id} className="flex gap-2 ml-10">
                         <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
@@ -469,7 +427,7 @@ const FeedsDisplay = () => {
                       </div>
                     ))}
                     
-                    {/* Add reply input */}
+                    {/* Add reply */}
                     {activeComment.postId === post.id && activeComment.commentId === comment.id && (
                       <div className="flex gap-2 ml-10">
                         <img src={assets.profilepic} alt="Profile" className="w-8 h-8 rounded-full" />
