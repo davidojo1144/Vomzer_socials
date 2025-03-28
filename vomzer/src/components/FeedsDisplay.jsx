@@ -36,7 +36,7 @@ const FeedsDisplay = () => {
   // Save posts to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('socialPosts', JSON.stringify(posts));
-  }, []);
+  }, [posts]);
 
   // Handle sign out
   const handleSignOut = async () => {
