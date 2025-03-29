@@ -219,7 +219,7 @@ const FeedsDisplay = () => {
       <div className="flex items-center justify-between px-4">
         <h3 className="text-xl font-semibold">Post & Feeds</h3>
         <div className="flex items-center gap-4">
-          <img src={assets.star} alt="Star icon" className="w-6 h-6" />
+          <img src={assets.logo} alt="Star icon" className="w-6 h-6" />
           <button 
             onClick={handleSignOut}
             className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"

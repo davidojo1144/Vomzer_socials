@@ -7,7 +7,7 @@ const TrendsDisplay = () => {
           <div className='md:w-[32%]'>
             <div className='flex items-center mb-5 ' >
               <img className='absolute w-3 h-3 ml-3' src={assets.searchicon} alt="" />
-              <input className='border border-gray-500 w-[100%] rounded-full bg-white pl-8 ' type="text" name="" id="" placeholder='Search' />
+              <input className='border border-gray-500 w-[100%] rounded-full bg-white pl-8 ' type="text" name="" id="" placeholder='Search on Vom' />
             </div>
             <div className='p-3 bg-white rounded-xl '>
               <h3 className='text-md font-bold'>What's happening</h3>
